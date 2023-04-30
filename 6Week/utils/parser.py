@@ -8,6 +8,8 @@ def parse_args():
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--epochs', type=int, default=5)
     parser.add_argument('--image_size', type=int, default=224)
+    parser.add_argument('--target_image', type=str, default='cifar', choices=['cifar', 'dog'])
+    parser.add_argument('--dataset_type', type=str, default='image_folder', choices=['image_folder', 'customTT', 'sklearn'])
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu')
 
     parser.add_argument('--data_path', type=str, default='../data')
@@ -18,6 +20,7 @@ def parse_args():
                         choices=['18', '34', '50', '101', '152'])
     
     parser.add_argument('--results_folder', type=str, default='results')
+    parser.add_argument('--save_itv', type=int, default=100)
 
     args = parser.parse_args()
     return args

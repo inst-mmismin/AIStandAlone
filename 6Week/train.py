@@ -49,7 +49,7 @@ def main():
             loss.backward()
             optim.step()
 
-            if (i+1) % 100 == 0:
+            if (i+1) % args.save_itv == 0:
                 print(f'Epoch [{epoch+1}/{args.epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}')
                 acc = evaluation(model, test_loader, args)
                 if acc > best_acc:

@@ -1,3 +1,4 @@
+import os 
 from misc.tools import *
 
 from torchvision import datasets 
@@ -7,8 +8,12 @@ from torchvision.transforms import Compose
 from torchvision.transforms import Resize
 from torchvision.transforms import Normalize
 
-def get_cifar_transform(args): 
-    mean, std = cifar_mean, cifar_std
+def get_transform(args): 
+    if args.target_image == 'cifar' : 
+        mean, std = cifar_mean, cifar_std
+    else : # 'dog'
+        mean, std = imagenet_mean, imagenet_std
+
     trans = Compose([
         Resize((args.image_size, args.image_size)), 
         ToTensor(),
@@ -16,13 +21,34 @@ def get_cifar_transform(args):
     ])
     return trans 
 
+def get_dataset(args, trans): 
+    if args.target_image == 'cifar': 
+        train_dataset = datasets.CIFAR10(root=args.data_path, train=True, transform=trans, download=True)
+        test_dataset = datasets.CIFAR10(root=args.data_path, train=False, transform=trans, download=True)
+    else : # 'dog'
+        if args.dataset_type == 'image_folder': 
+            from torchvision.datasets import ImageFolder
+            train_dataset = ImageFolder(root=os.path.join(args.data_path, 'train'), transform=trans)
+            test_dataset = ImageFolder(root=os.path.join(args.data_path, 'test'), transform=trans)
+        
+        elif args.dataset_type == 'customTT':
+            from modules.dataset import Dog_Dataset
+            train_dataset = Dog_Dataset(data_path=os.path.join(args.data_path, 'train'), transform=trans)
+            test_dataset = Dog_Dataset(data_path=os.path.join(args.data_path, 'test'), transform=trans)
+        
+        elif args.dataset_type == 'sklearn':
+            from modules.dataset import Dog_Dataset
+            from sklearn.model_selection import train_test_split
+            tmp_dataset = Dog_Dataset(data_path=args.data_path, transform=trans)
+            train_dataset, test_dataset = train_test_split(tmp_dataset, test_size=0.2, random_state=42)
+
+    return train_dataset, test_dataset
 
 def get_dataloader(args) : 
-    trans = get_cifar_transform(args)
+    trans = get_transform(args)
     
-    train_dataset = datasets.CIFAR10(root=args.data_path, train=True, transform=trans, download=True)
-    test_dataset = datasets.CIFAR10(root=args.data_path, train=False, transform=trans, download=True)
-    
+    train_dataset, test_dataset = get_dataset(args, trans)
+
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=False)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False)
 

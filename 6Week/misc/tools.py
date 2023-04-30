@@ -8,6 +8,9 @@ cifar_mean = [0.49139968, 0.48215827, 0.44653124]
 cifar_std = [0.24703233, 0.24348505, 0.26158768]
 cifar_classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
+imagenet_mean = [0.485, 0.456, 0.406]
+imagenet_std = [0.229, 0.224, 0.225]
+
 def get_data_mean_and_std(data_type='cifar', data_path='../data'):
     if data_type == 'cifar' : 
         tmp_dataset = datasets.CIFAR10(root=data_path, transform=ToTensor(), train=True, download=True)
