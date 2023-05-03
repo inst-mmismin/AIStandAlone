@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu')
 
     parser.add_argument('--data_path', type=str, default='../data')
-    parser.add_argument('--model', type=str, default='resnet', choices=['LeNet', 'vgg', 'resnet'])
+    parser.add_argument('--model', type=str, default='resnet', choices=['LeNet', 'vgg', 'resnet', 'pretrained'])
     parser.add_argument('--vgg_type', type=str, default='A', 
                         choices=['A', 'B', 'C', 'D', 'E'])
     parser.add_argument('--resnet_config', type=str, default='18', 

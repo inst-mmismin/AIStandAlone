@@ -9,16 +9,21 @@ from torchvision.transforms import Resize
 from torchvision.transforms import Normalize
 
 def get_transform(args): 
-    if args.target_image == 'cifar' : 
-        mean, std = cifar_mean, cifar_std
-    else : # 'dog'
-        mean, std = imagenet_mean, imagenet_std
+    if args.model == 'pretrained' : 
+        from torchvision.transforms._presets import ImageClassification
+        trans = ImageClassification(crop_size=args.image_size, resize_size=args.image_size)
+    else : 
+        if args.target_image == 'cifar' : 
+            mean, std = cifar_mean, cifar_std
+        else : # 'dog'
+            mean, std = imagenet_mean, imagenet_std
 
-    trans = Compose([
-        Resize((args.image_size, args.image_size)), 
-        ToTensor(),
-        Normalize(mean, std)
-    ])
+        trans = Compose([
+            Resize((args.image_size, args.image_size)), 
+            ToTensor(),
+            Normalize(mean, std)
+        ])
+        
     return trans 
 
 def get_dataset(args, trans): 
@@ -76,9 +81,19 @@ def get_model(args) :
             model = VGG_E(args.num_classes)
         else :
             raise NotImplementedError
+        
     elif args.model == 'resnet' : 
         from networks.ResNet import ResNet
         model = ResNet(args.num_classes, args.resnet_config)
+
+    elif args.model == 'pretrained' : 
+        from torchvision.models import resnet18, ResNet18_Weights
+        import torch.nn as nn 
+        weight= ResNet18_Weights.DEFAULT
+        model = resnet18(weights=weight)
+        
+        in_feat = model.fc.in_features
+        model.fc = nn.Linear(in_feat, args.num_classes)
         
     else : 
         raise ValueError

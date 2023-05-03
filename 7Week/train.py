@@ -33,7 +33,17 @@ def main():
     
     # Loss, Optimizer 생성
     criteria = nn.CrossEntropyLoss() 
-    optim = Adam(model.parameters(), lr=args.lr)
+    if args.model == 'pretrained' : 
+        param_groups = []
+        for n, m in model.named_children() :
+            if n in ['fc']: 
+                param_groups.append({'params':model.__getattr__(n).parameters(), 'lr':args.lr*0.1})
+            else : 
+                param_groups.append({'params':model.__getattr__(n).parameters(), 'lr':args.lr})
+
+        optim = Adam(param_groups)
+    else : 
+        optim = Adam(model.parameters(), lr=args.lr)
 
     # 학습 시작
     best_acc = 0 
@@ -55,7 +65,7 @@ def main():
                 if acc > best_acc:
                     best_acc = acc
                     torch.save(model.state_dict(), os.path.join(save_folder_path, 'best_model.pth'))
-                    print(f'Best model saved!! accuracy : {acc*100:.2f}')
+                    print(f'Best model saved!! accuracy : {acc*100:.2f} %')
 
 if __name__ == '__main__':
     main()
